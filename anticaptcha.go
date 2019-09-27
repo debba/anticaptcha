@@ -172,3 +172,29 @@ func (c *Client) SendImage(imgString string) (string, error) {
 	}
 	return response["solution"].(map[string]interface{})["text"].(string), nil
 }
+
+// GetBalance Method to get current account balance
+func (c *Client) GetBalance() (float64, error) {
+	// Mount the data to be sent
+	body := map[string]interface{}{
+		"clientKey": c.APIKey}
+
+	b, err := json.Marshal(body)
+	if err != nil {
+		return -1, err
+	}
+
+	// Make the request
+	u := baseURL.ResolveReference(&url.URL{Path: "/getBalance"})
+	resp, err := http.Post(u.String(), "application/json", bytes.NewBuffer(b))
+	if err != nil {
+		return -1, err
+	}
+	defer resp.Body.Close()
+
+	// Decode response
+	responseBody := make(map[string]interface{})
+	json.NewDecoder(resp.Body).Decode(&responseBody)
+	// TODO treat api errors and handle them properly
+	return responseBody["balance"].(float64), nil
+}
